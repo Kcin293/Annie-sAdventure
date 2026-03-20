@@ -158,7 +158,6 @@ public class GrappleController : MonoBehaviour
 
         if (hit.collider != null)
         {
-            Debug.Log("Hit: " + hit.collider.name);
             cachedHit = hit;
             cachedHitSomething = true;
             hitCollider = hit.collider;  // save the collider for damage
@@ -331,4 +330,8 @@ public class GrappleController : MonoBehaviour
         canGrapple = true;
     }
 
+    public float GetGrappleRange()
+    {
+        return maxGrappleDistance;
+    }
 }

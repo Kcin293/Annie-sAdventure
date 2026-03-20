@@ -1,0 +1,8 @@
+.venv
+.vscode
+__pycache__
+*.pyc
+*.pyo
+level_data.json
+data.cs
+levelExporter.cs

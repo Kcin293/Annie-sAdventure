@@ -194,4 +194,9 @@ public class Seed : Interactable
         gameManager.UnregisterSeed(this.gameObject);
         Destroy(this.gameObject);
     }
+
+    public float GetJumpForce()
+    {
+        return jumpForce;
+    }
 }

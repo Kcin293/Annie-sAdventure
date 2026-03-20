@@ -9,6 +9,7 @@ TagManager:
   - Seed
   - Vine
   - Boss
+  - Platform
   layers:
   - Default
   - TransparentFX

@@ -1,0 +1,30 @@
+services:
+  app:
+      build: .
+      volumes:
+       - ./level_data.json:/app/level_data.json
+       - ./generated_level_data.json:/app/generated_level_data.json
+
+      environment:
+       - OLLAMA_HOST=http://ollama:11434
+       - MONGO_URL=mongodb://mongo:27017
+      depends_on:
+       - ollama
+       - mongo
+      ports:
+        - "8000:8000"
+    
+  ollama:
+      image: ollama/ollama
+      volumes:
+       - ollama_data:/root/.ollama
+
+  mongo:
+    image: mongo:7
+    volumes:
+       - mongo_data:/data/db
+    ports:
+     - "27017:27017"
+volumes:
+  mongo_data:
+  ollama_data:

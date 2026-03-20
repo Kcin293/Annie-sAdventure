@@ -112,9 +112,16 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject TutorialCanvas;
 
     /// <summary>
+    /// LevelExporter for AI.
+    /// </summary>
+    [SerializeField] private LevelExporter levelExporter;
+
+    /// <summary>
     /// Flag indicating if the boss fight has started.
     /// </summary>
     private bool bossFightStarted = false;
+
+
 
     /// <summary>
     /// Ensures only one instance of GameManager exists (singleton pattern).

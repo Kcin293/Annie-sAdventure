@@ -11,9 +11,10 @@ public class PlayerInputSubscription : MonoBehaviour
 
     public bool DeattackInput { get; set; }
 
+
     public bool InteractInput { get; private set; } = false;
     public event Action OnInteractPressed;
-
+    public event Action OnExportPressed;
     PlayerInput _input = null;
 
     public bool InputEnabled { get; private set; } = true;
@@ -38,6 +39,7 @@ public class PlayerInputSubscription : MonoBehaviour
         _input.PlayerInputMap.Interact.canceled += SetInteract;
         _input.PlayerInputMap.Deattach.started += SetDeattach;
         _input.PlayerInputMap.Deattach.canceled += SetDeattach;
+        _input.PlayerInputMap.ExportLevel.started += SetExport;
     }
 
     private void OnDisable()
@@ -53,6 +55,7 @@ public class PlayerInputSubscription : MonoBehaviour
         _input.PlayerInputMap.Interact.canceled -= SetInteract;
         _input.PlayerInputMap.Deattach.started -= SetDeattach;
         _input.PlayerInputMap.Deattach.canceled -= SetDeattach;
+        _input.PlayerInputMap.ExportLevel.started -= SetExport;
     }
 
     void SetMovement(InputAction.CallbackContext context)
@@ -88,5 +91,13 @@ public class PlayerInputSubscription : MonoBehaviour
 
         if (context.started)
             OnInteractPressed?.Invoke();
+    }
+
+    void SetExport(InputAction.CallbackContext context)
+    {
+        if (!InputEnabled) return;
+
+        if (context.started)
+            OnExportPressed?.Invoke();
     }
 }

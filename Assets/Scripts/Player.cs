@@ -381,4 +381,8 @@ public class Player : HealthSystem
         yield return new WaitForSeconds(duration);
         isKnockedBack = false;
     }
+
+    public float GetSpeed() { return speed;}
+    public float GetJumpForce() { return jumpForce; }
+    public GrappleController GetGrappleController() { return grappleController; }
 }
