@@ -93,5 +93,5 @@ POST http://localhost:8080/analyze
 **Generate a level variant:**
 
 POST http://localhost:8080/analyze
-{ "prompt": "Generate a harder level with mandatory enemy interactions" }
+{ "prompt": "Generate a harder level" }
 
