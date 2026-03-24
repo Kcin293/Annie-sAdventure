@@ -48,50 +48,16 @@ Python AI Backend
 - whether enemies are mandatory or avoidable (graph surgery technique)
 
 **Level Generator** — given a natural language prompt, the system:
-- uses an LLM agent to generate a structured section description
-- builds geometry procedurally via `LevelBuilder`
-- validates completability with the analyzer
+- retrieves similar levels from MongoDB as context (RAG)
+- uses a LangGraph agent to generate a structured section description
+- builds geometry procedurally via `LevelBuilder`, including enemy placement
+- distinguishes between avoidable enemies (`enemy_avoid`) and mandatory ones (`enemy_mandatory`) requiring flower jump
+- validates completability with the analyzer in a feedback loop
 - iterates automatically until a valid level is produced
-- saves results to MongoDB for future reference
+- saves results to MongoDB for future RAG retrieval
 
-**Unity Integration** — generated levels are exported as JSON and imported directly into Unity via a custom `LevelImporter`, including player spawn positioning.
+**Unity Integration** — generated levels are exported as JSON and imported directly into Unity via a custom `LevelImporter`, including player spawn positioning and enemy instantiation.
 
+**MCP Server** — exposes `analyze_level` and `generate_variant` as tools directly accessible from Claude Desktop, enabling game designers to interact with the AI system through natural language without any additional tooling.
 
-
-## Tech Stack
-
-| Area | Technology |
-------
-| Game Engine | Unity 2D |
-| AI Backend | Python, LangChain, LangGraph |
-| LLM | Ollama (local inference) |
-| API | FastAPI |
-| Gateway | Java, Spring Boot |
-| Database | MongoDB |
-| Infrastructure | Docker, docker-compose |
-
-
-
-## Running the AI Backend
-
-Prerequisites: Docker Desktop, Ollama
-
-
-git clone https://github.com/your-repo/annie-adventure
-docker compose up --build
-docker exec -it ai-ollama-1 ollama pull qwen2.5:14b
-
-
-The FastAPI docs are available at `http://localhost:8000/docs`
-
-**Analyze a level:**
-
-POST http://localhost:8080/analyze
-{ "prompt": "Analyze level_data.json and tell me if it's too difficult" }
-
-
-**Generate a level variant:**
-
-POST http://localhost:8080/analyze
-{ "prompt": "Generate a harder level" }
 
