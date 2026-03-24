@@ -6,6 +6,7 @@ public class LevelImporter : MonoBehaviour
 {
     [SerializeField] Tilemap tilemap;
     [SerializeField] TileBase solidTile;
+    [SerializeField] GameObject EnemyPrefab;
     public string fileName = "generated_level_data.json";
     void Start()
     {
@@ -21,9 +22,17 @@ public class LevelImporter : MonoBehaviour
         {
             tilemap.SetTile(new Vector3Int(tile.x,tile.y, 0), solidTile);
         }
+        if (enemyPrefab != null)
+        {
+            foreach (EnemyData enemy in level.enemies)
+            {
+                Instantiate(EnemyPrefab,enemy.position);
+            }
+        }
         Player player = FindAnyObjectByType<Player>();
         if (player != null)
-            player.transform.position = new Vector3(level.playerStart.x, level.playerStart.y, 0);
-            player.EnableGameplayInput(true);
+        {player.transform.position = new Vector3(level.playerStart.x, level.playerStart.y, 0);
+            player.EnableGameplayInput(true);}
+            
     }
 }

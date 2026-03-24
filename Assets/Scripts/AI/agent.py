@@ -4,7 +4,7 @@ from tools import analyze_level, generate_variant
 import os
 from langchain_core.messages import SystemMessage
 import json
-from database import save_level
+from database import save_level, get_similar_levels
 
 system_prompt = """Sei un assistente per game designer.
 Puoi analizzare livelli e generare varianti.
@@ -16,7 +16,8 @@ SEZIONI DISPONIBILI:
 - drop: {x, y_top, y_bottom, width, depth}
 - staircase: {start_x, start_y, count, spacing_x, height_delta, width, depth}
 - column: {start_x, start_y, count, width, depth}
-
+- enemy_avoid: {x,y,width, depth}
+- enemy_mandatory: {x, y, width, depth, wall_height}
 Ogni sezione ha formato: {"type": "...", "params": {...}}
 
 VINCOLI:
@@ -41,10 +42,18 @@ tools = [analyze_level, generate_variant]
 
 agent = create_agent(llm, tools,system_prompt=system_prompt)
 
+
 def run_agent_with_feedback(prompt, max_iterations=3):
+    examples = get_similar_levels(prompt)
+    
+    enriched_prompt = prompt
+    if examples:
+        enriched_prompt += f"\n\nEsempi di livelli precedenti che hanno funzionato:\n{json.dumps(examples, indent=2)}"
+    
+
     for i in range(max_iterations):
         result = agent.invoke({
-            "messages": [("human", prompt)]
+            "messages": [("human", enriched_prompt)]
         })
         
         level_data = None
@@ -71,13 +80,13 @@ def run_agent_with_feedback(prompt, max_iterations=3):
         if report and report.get("completable"):
             print(f"Livello completabile trovato in {i+1} iterazioni!")
             if level_data:
-                save_level(prompt, level_data, report, i+1)
+                save_level(enriched_prompt, level_data, report, i+1)
             return result["messages"][-1].content, level_data, report, i+1
         
         # altrimenti aggiorna il prompt con feedback
-        prompt = f"{prompt}. Il livello precedente non era completabile, riprova."
-        if level_data:
-                save_level(prompt, level_data, report, i+1)
+        enriched_prompt = f"{enriched_prompt}. Il livello precedente non era completabile, riprova."
+    if level_data:
+        save_level(enriched_prompt, level_data, report or {}, i+1)
 
 
     return result["messages"][-1].content, level_data, report, max_iterations

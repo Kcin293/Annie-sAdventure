@@ -64,12 +64,62 @@ class LevelBuilder:
                 tiles.append({"x": fx, "y": y - d})
         return tiles
 
+    def build_enemy_avoid(self, x, y, width, depth):
+        """Piattaforma con nemico aggirabile — il pathfinder gli assegna cost=20"""
+        tiles = [
+            {"x": fx, "y": y - d}
+            for d in range(depth + 1)
+            for fx in range(x, x + width + 1)
+        ]
+        return {
+            "tiles": tiles,
+            "enemy": {
+                "position": {
+                    "x": x + width // 2,
+                    "y": y + 1  # nemico sopra la piattaforma
+                }
+            }
+        }
+
+    def build_enemy_mandatory(self, x, y, width, depth, wall_height=0):
+        """
+        Piattaforma con nemico mandatory.
+        wall_height > 0 → muro dopo la piattaforma
+        wall_height = 0 → gap (nessun muro)
+        """
+        # piattaforma
+        tiles = [
+            {"x": fx, "y": y - d}
+            for d in range(depth + 1)
+            for fx in range(x, x + width + 1)
+        ]
+        
+        # muro opzionale dopo la piattaforma
+        if wall_height > 0:
+            wall_x = x + width + 1
+            for wy in range(y, y + wall_height + 1):
+                for d in range(depth + 1):
+                    tiles.append({"x": wall_x - d, "y": wy})
+        
+        return {
+            "tiles": tiles,
+            "enemy": {
+                "position": {
+                    "x": x + width // 2,
+                    "y": y + 1  # sopra la piattaforma
+                }
+            }
+        }
     def build(self, sections: list, base_params: dict) -> dict:
         tiles = []
+        enemies = []
         current_x = 0
         for section in sections:
             section_type = section["type"]
-            
+            section["params"] = {
+                k: int(v) if isinstance(v, float) else v 
+                for k, v in section["params"].items()
+            }
             match  section_type:
                 case "ground":
                     p = {k: v for k, v in section["params"].items() if k != "start_x"}
@@ -91,7 +141,19 @@ class LevelBuilder:
                     tiles += self.build_column(current_x, **p)
                     current_x += section["params"]["width"]
                 
-            
+                case "enemy_avoid":
+                    p = {k: v for k, v in section["params"].items() if k != "start_x"}
+                    retval = self.build_enemy_avoid(current_x, **p)
+                    tiles += retval["tiles"]
+                    enemies.append(retval["enemy"])
+                    current_x += section["params"]["width"]
+
+                case "enemy_mandatory":
+                    p = {k: v for k, v in section["params"].items() if k != "start_x"}
+                    retval = self.build_enemy_mandatory(current_x, **p)
+                    tiles += retval["tiles"]
+                    enemies.append(retval["enemy"])
+                    current_x += section["params"]["width"] + section["params"].get("wall_height", 0) + 2
         
         # deduplicazione
         tiles = list({(t["x"], t["y"]): t for t in tiles}.values())
@@ -129,5 +191,6 @@ class LevelBuilder:
                 base_params[key] = value
         return {
             **base_params,
-            "solidTiles": tiles
+            "solidTiles": tiles,
+            "enemies": enemies
         }
